@@ -1,5 +1,5 @@
 import json
-from flask import Flask
+from flask import Flask, abort
 from about_me import me
 from mock_data import catalog
 
@@ -40,8 +40,56 @@ def get_count():
 
 @app.route("/api/product/<id>", methods=["GET"])
 def get_product(id):
-    return json.dumps(id)
 
+    for prod in catalog:
+        print (prod)
+        if prod["_id"] == id:
+            return json.dumps(prod)
+
+    return abort(404, "Id does not match any product")
+
+
+@app.route("/api/catalog/total", methods=["GET"])
+def get_total():
+        
+        total = 0
+        for prod in catalog:
+            total += prod["price"]
+        return json.dumps(total)
+
+
+@app.route("/api/products/<category>", methods=["GET"])
+def products_by_category(category):
+    results = []
+    category = category.lower()
+    for prod in catalog:
+        if prod["category"].lower() == category:
+            results.append(prod)
+
+    return json.dumps(results)
+
+
+@app.get("/api/categories")
+def get_unique_categories():
+    results = []
+    for prod in catalog:
+        cat = prod["category"]
+        if not cat in results:
+            results.append(cat)
+
+    return json.dumps(results)
+
+
+#get the cheapest product
+
+@app.get("/api/product/cheapest")
+def get_cheapest_product():
+    solution = catalog[0]
+    for prod in catalog:
+        if prod["price"] < solution["price"]:
+            solution = prod
+
+    return json.dumps(solution)
 
 
 

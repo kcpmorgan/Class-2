@@ -1,6 +1,6 @@
 catalog = [
     {
-        "_id:": "1s1001",
+        "_id": "1s1001",
         "price": 8.00,
         "stock": 10,
         "title": "Cinnamon",
@@ -24,7 +24,7 @@ catalog = [
         "title": "Clove",
         "image": "Cloves.jpeg",
         "discount": 0,
-        "category": "Spices",
+        "category": "Herbs",
       },
       {
         "_id": "1s1004",
@@ -42,7 +42,7 @@ catalog = [
         "title": "Bay Leaf",
         "image": "Bay Leaf.webp",
         "discount": 0,
-        "category": "Spices",
+        "category": "Herbs",
       },
       {
         "_id": "1s1006",
