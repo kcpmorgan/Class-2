@@ -1,11 +1,13 @@
 import json
-from flask import Flask, abort, request
+from flask import Flask, Response, abort, request
 from about_me import me
 from mock_data import catalog #IMPORTANT STEP
 from config import db
 from bson import ObjectId
+from flask_cors import CORS
 
 app = Flask("spicebasket")
+CORS(app)
 
 @app.route("/", methods=["GET"]) #root (/)
 def home():
@@ -165,18 +167,47 @@ def get_all_coupons():
 
 
 # save coupon code
-@app.route("/api/coupons", methods=["post"])
+@app.route("/api/coupons", methods=["POST"])
 def save_coupon():
-    coupon = request.get_json()
+    try:
 
-    db.coupons.insert_one(coupon)
+        coupon = request.get_json()
 
-    coupon["_id"] = str(coupon["_id"])
-    return json.dumps(coupon)
+        errors = ""
+        if not "code" in coupon or len(coupon["code"]) < 5:
+            error += "Coupon should have at least 5 chars"
+
+        if not "discount" in coupon or coupon["discount"] < 1  or coupon["discount"] > 50:
+            errors += "Discount is required and should be between 1 and 50"
+
+        if errors:
+            return Response(errors, status=400)
+
+    
+        exist = db.coupons.find_one({"code": coupon["code"]})
+        if exist:
+            return Response("A coupon already exists for that code", status=400)
+
+        db.coupons.insert_one(coupon)
+
+        coupon["_id"] = str(coupon["_id"])
+        return json.dumps(coupon)
+
+    except Exception as ex:
+        print(ex)
+        return Response("Unexpected error", status=500)
 
 
 # get CC by code
+@app.route("/api/coupons/<code>", methods=["GET"])
+def get_coupon_by_code(code):
 
+    coupon = db.coupons.find_one({"code": code})
+    if not coupon:
+        return abort(400, "Coupon not found")
+
+    coupon["_id"] = str(coupon["_id"])    
+    return json.dumps(coupon)
 
 
 
